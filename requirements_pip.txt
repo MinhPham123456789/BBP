@@ -1,0 +1,19 @@
+astroid @ file:///work/ci_py311/astroid_1676920975848/work
+beautifulsoup4==4.12.2
+bs4==0.0.1
+certifi==2023.7.22
+charset-normalizer==3.2.0
+colorama @ file:///work/ci_py311/colorama_1676827038675/work
+dill @ file:///croot/dill_1692271232022/work
+idna==3.4
+isort @ file:///tmp/build/80754af9/isort_1628603791788/work
+lazy-object-proxy @ file:///work/ci_py311/lazy-object-proxy_1676827255418/work
+lxml==4.9.3
+mccabe @ file:///opt/conda/conda-bld/mccabe_1644221741721/work
+platformdirs @ file:///croot/platformdirs_1692205439124/work
+pylint @ file:///work/ci_py311/pylint_1676920998643/work
+requests==2.31.0
+soupsieve==2.5
+tomlkit @ file:///work/ci_py311/tomlkit_1676823218885/work
+urllib3==2.0.5
+wrapt @ file:///work/ci_py311/wrapt_1676827586170/work
