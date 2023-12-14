@@ -1,0 +1,83 @@
+Starting Nmap 7.60 ( https://nmap.org ) at 2023-09-20 13:13 +07
+Nmap scan report for 10.10.243.180
+Host is up (0.31s latency).
+Not shown: 995 filtered ports
+PORT     STATE SERVICE       VERSION
+21/tcp   open  ftp           FileZilla ftpd
+53/tcp   open  domain        Microsoft DNS
+80/tcp   open  http          Microsoft IIS httpd 10.0
+135/tcp  open  msrpc         Microsoft Windows RPC
+3389/tcp open  ms-wbt-server Microsoft Terminal Services
+Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 29.79 seconds
+
+Starting Nmap 7.60 ( https://nmap.org ) at 2023-09-20 15:31 +07
+Nmap scan report for localhost (127.0.0.1)
+Host is up (0.00011s latency).
+Not shown: 999 closed ports
+PORT    STATE SERVICE VERSION
+631/tcp open  ipp     CUPS 2.2
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 6.59 seconds
+
+Starting Nmap 7.60 ( https://nmap.org ) at 2023-09-24 10:36 +07
+Nmap scan report for 10.10.220.152
+Host is up (0.31s latency).
+Not shown: 995 filtered ports
+PORT     STATE SERVICE       VERSION
+21/tcp   open  ftp           FileZilla ftpd
+|_sslv2-drown: 
+53/tcp   open  domain        Microsoft DNS
+80/tcp   open  http          Microsoft IIS httpd 10.0
+|_http-csrf: Couldn't find any CSRF vulnerabilities.
+|_http-dombased-xss: Couldn't find any DOM based XSS.
+|_http-server-header: Microsoft-IIS/10.0
+|_http-stored-xss: Couldn't find any stored XSS vulnerabilities.
+135/tcp  open  msrpc         Microsoft Windows RPC
+3389/tcp open  ms-wbt-server Microsoft Terminal Services
+|_sslv2-drown: 
+Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 353.28 seconds
+
+Starting Nmap 7.60 ( https://nmap.org ) at 2023-09-24 11:14 +07
+Nmap scan report for 10.10.159.56
+Host is up (0.31s latency).
+Not shown: 996 closed ports
+PORT    STATE SERVICE       VERSION
+22/tcp  open  ssh           OpenSSH 8.2p1 Ubuntu 4ubuntu0.5 (Ubuntu Linux; protocol 2.0)
+80/tcp  open  http          Apache httpd 2.4.41 ((Ubuntu))
+|_http-csrf: Couldn't find any CSRF vulnerabilities.
+|_http-dombased-xss: Couldn't find any DOM based XSS.
+|_http-server-header: Apache/2.4.41 (Ubuntu)
+|_http-stored-xss: Couldn't find any stored XSS vulnerabilities.
+139/tcp open  netbios-ssn?
+| fingerprint-strings: 
+|   SMBProgNeg: 
+|_    SMBr
+445/tcp open  microsoft-ds?
+| fingerprint-strings: 
+|   SMBProgNeg: 
+|_    SMBr
+2 services unrecognized despite returning data. If you know the service/version, please submit the following fingerprints at https://nmap.org/cgi-bin/submit.cgi?new-service :
+==============NEXT SERVICE FINGERPRINT (SUBMIT INDIVIDUALLY)==============
+SF-Port139-TCP:V=7.60%I=7%D=9/24%Time=650FB7EC%P=x86_64-pc-linux-gnu%r(SMB
+SF:ProgNeg,29,"\0\0\0%\xffSMBr\0\0\0\0\x88\x03@\0\0\0\0\0\0\0\0\0\0\0\0\0\
+SF:0@\x06\0\0\x01\0\x01\xff\xff\0\0");
+==============NEXT SERVICE FINGERPRINT (SUBMIT INDIVIDUALLY)==============
+SF-Port445-TCP:V=7.60%I=7%D=9/24%Time=650FB7E7%P=x86_64-pc-linux-gnu%r(SMB
+SF:ProgNeg,29,"\0\0\0%\xffSMBr\0\0\0\0\x88\x03@\0\0\0\0\0\0\0\0\0\0\0\0\0\
+SF:0@\x06\0\0\x01\0\x01\xff\xff\0\0");
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+Host script results:
+|_samba-vuln-cve-2012-1182: Could not negotiate a connection:Server negotiated an unknown protocol (#65535) -- aborting
+|_smb-vuln-ms10-054: false
+|_smb-vuln-ms10-061: Could not negotiate a connection:Server negotiated an unknown protocol (#65535) -- aborting
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 224.27 seconds
