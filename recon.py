@@ -5,7 +5,7 @@ import functools
 from multiprocessing import Pool
 
 config_path = "./recon.config"
-target = "medium.com"
+target = "google.com"
 DEBUG = True
 
 def smap(f):
