@@ -1,6 +1,7 @@
 from tools_base.whois.whois_run import Whois
 from tools_base.nmap.nmap_run import Nmap
 from recon_logging import Logging
+from recon_version_control import VersionControl
 import functools
 from multiprocessing import Pool
 
@@ -60,3 +61,10 @@ for i in xml_output_order:
 
 log_file_path = xml_logger.save_log()
 print(f"Outputs are saved to {log_file_path}")
+
+### Version control section
+version_controller = VersionControl(xml_logger.get_target_logs_dir(), log_file_path.split("/")[-1], DEBUG)
+if DEBUG:
+    print(version_controller.previous_log_name)
+    print(version_controller.new_log_name)
+version_controller.compare_version()

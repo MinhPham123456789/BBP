@@ -39,6 +39,9 @@ class Logging:
         output_order = config['log']['output_order']
         return output_order.split(',\n')
 
+    def get_target_logs_dir(self):
+        return self.target_dir
+
 def get_log_path(config_path):
     config = configparser.ConfigParser()
     config.read(config_path)
