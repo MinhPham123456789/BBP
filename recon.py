@@ -1,4 +1,5 @@
 from tools_base.whois.whois_run import Whois
+from tools_base.nslookup.nslookup_run import Nslookup
 from tools_base.nmap.nmap_run import Nmap
 from recon_logging import Logging
 from recon_version_control import VersionControl
@@ -21,6 +22,10 @@ whois_process = Whois(target, config_path, DEBUG)
 tools_object_dictionary['whois'] = whois_process
 commands_dictionary['whois'] = whois_process.command
 # whois_output = whois_process.run_command()
+
+nslookup_process = Nslookup(target, config_path, DEBUG)
+tools_object_dictionary['nslookup'] = nslookup_process
+commands_dictionary['nslookup'] = nslookup_process.command
 
 nmap_process = Nmap(target, config_path, DEBUG)
 tools_object_dictionary['nmap'] = nmap_process
