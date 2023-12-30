@@ -3,12 +3,21 @@ import shlex
 import subprocess
 
 def replace_target(command, target):
-        return command.replace("TARGET_HERE", target)
+    return command.replace("TARGET_HERE", target)
+
+def replace_place_holder(command, place_holder_pattern, value):
+    return command.replace(place_holder_pattern, value)
 
 def get_command(config_path, tool):
     config = configparser.ConfigParser()
     config.read(config_path)
     command = config["commands"][tool]
+    return command
+
+def get_env_values(config_path, env_section, env_variable_name):
+    config = configparser.ConfigParser()
+    config.read(config_path)
+    command = config[env_section][env_variable_name]
     return command
 
 def prepare_command(command):
@@ -18,7 +27,11 @@ def prepare_command(command):
         shlex_command = shlex.split(command)
         return shlex_command
 
+command_whitelist = ["subdomains_merge"]
+
 def check_command_existence(tool):
+    if tool in command_whitelist:
+        return True
     shlex_command = shlex.split(f"which {tool}")
     sub_proc = subprocess.Popen(shlex_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     try:
