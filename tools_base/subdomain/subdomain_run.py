@@ -2,8 +2,13 @@ import shlex
 import os
 import subprocess
 import configparser
+from multiprocessing import Pool
+import functools
+
 from recon_exceptions import *
 from recon_utils import *
+from recon_logging import Logging
+from .snrublist3r_run import Snrublist3er
 
 ordered_subdomain_wordlists = [
     "bug-bounty-program-subdomains-trickest-inventory.txt",
@@ -55,7 +60,7 @@ class SubdomainScanner:
         self.merged_subdomain_wordlist1 = f"{self.subdomain_temp_wordlists_path}/{merged_wordlist_1_name}"
         merge_command = replace_place_holder(merge_command, "SUBDOMAIN_MERGE_WORDLIST", self.merged_subdomain_wordlist)
         if self.debug:
-            print(f"Merged subdomain wordlist: {merge_command}")
+            print(f"Merged subdomain wordlist command: {merge_command}")
 
         self.tools_commands_dict = {
             "subdomains_merge": merge_command,
@@ -147,3 +152,67 @@ class SubdomainScanner:
                 # if self.debug:
                 #     print(output)
         print(f"[Process]Rebuild the subdomain wordlists in {self.subdomain_temp_wordlists_path} completed!")
+
+    def run_subdomain_discovery(self):
+        """
+        Idea: 
+        + a dict to store all tools instance and then run them in
+        multiprocess pool then save them to log in order, pass the
+        output dictionary to the save_subdomain_tools_output_log()
+        + another method to clean, merge, and sort all the discovered
+        subdomains by all the tools then put them in a big list string
+        as output to be saved into the main ReconLog
+
+        """
+        tools_object_dictionary = {}
+        commands_dictionary = {}
+
+        # Snrublist3r
+        snrublist3r_process = Snrublist3er(self.target, self.command_config_path, self.debug)
+        tools_object_dictionary['snrublist3r'] = snrublist3r_process
+        commands_dictionary['snrublist3r'] = snrublist3r_process.command
+
+
+        processes = []
+        for p in list(tools_object_dictionary.values()):
+            processes.append(functools.partial(p.run_command))
+        
+        pool = Pool(processes=len(tools_object_dictionary))
+        res = pool.map(smap, processes)
+        pool.close()
+        pool.join()
+        if self.debug:
+            print(res)
+
+        # Build the output dictionary
+        tools_outputs_dict = {}
+        for output_string in res:
+            for tool in list(commands_dictionary.keys()):
+                if commands_dictionary[tool] in output_string:
+                    tools_outputs_dict[tool] = output_string
+                    break
+
+        if self.debug:
+            print(f"Subdomain tools outputs dict:\n{tools_outputs_dict}")
+        # Save the subdomain tools logs
+        self.save_subdomain_tools_output_log(tools_outputs_dict, commands_dictionary)
+
+    def save_subdomain_tools_output_log(self, tools_outputs_dict, commands_dictionary):
+        subdomain_logging = Logging(self.target, self.command_config_path, "subdomain")
+        for tool_name in tools_outputs_dict:
+            try:
+                subdomain_logging.add_tool_log(tool_name, commands_dictionary[tool_name], tools_outputs_dict[tool_name])
+            except KeyError:
+                print(f"tools_object_dictionary KeyError with key '{tool_name}'")
+            except Exception as e:
+                print(f"[Unknown error] message: {e}")
+
+        # Save the subdomain tools log
+        subdomain_log_file_path = subdomain_logging.save_log()
+        print(f"Subdomain tools' outputs are saved to {subdomain_log_file_path}")
+
+def smap(f):
+    """
+    This method is utilised by multiprocess pool
+    """
+    return f()

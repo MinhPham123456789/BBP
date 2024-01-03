@@ -1,6 +1,7 @@
 import configparser
 import shlex
 import subprocess
+from recon_exceptions import *
 
 def replace_target(command, target):
     return command.replace("TARGET_HERE", target)
@@ -28,9 +29,12 @@ def prepare_command(command):
         return shlex_command
 
 command_whitelist = ["subdomains_merge"]
+external_tools = ["snrublist3r"]
 
 def check_command_existence(tool):
     if tool in command_whitelist:
+        return True
+    if tool in external_tools:
         return True
     shlex_command = shlex.split(f"which {tool}")
     sub_proc = subprocess.Popen(shlex_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)

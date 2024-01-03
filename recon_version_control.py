@@ -4,7 +4,7 @@ import difflib
 class VersionControl:
     def __init__(self, target_logs_dir, new_log_name, DEBUG=False):
         self.target_logs_dir = target_logs_dir
-        self.version_logs_dir = f"{self.target_logs_dir}/version"
+        self.version_logs_dir = f"{self.target_logs_dir}/version_comparison"
         self.check_version_logs_dir_existence()
         self.new_log_name = new_log_name
         self.previous_log_name = self.get_previous_log_name()

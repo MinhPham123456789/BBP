@@ -12,6 +12,9 @@ target = "google.com"
 DEBUG = True
 
 def smap(f):
+    """
+    This method is utilised by multiprocess pool
+    """
     return f()
 
 ### Init section
@@ -19,6 +22,7 @@ xml_logger = Logging(target, config_path)
 tools_object_dictionary = {}
 commands_dictionary = {}
 
+### Domain Intelligence Gather section
 whois_process = Whois(target, config_path, DEBUG)
 tools_object_dictionary['whois'] = whois_process
 commands_dictionary['whois'] = whois_process.command
@@ -28,6 +32,12 @@ nslookup_process = Nslookup(target, config_path, DEBUG)
 tools_object_dictionary['nslookup'] = nslookup_process
 commands_dictionary['nslookup'] = nslookup_process.command
 
+### Subdomain section
+# Note: Rebuild the subdomain wordlists is in recon_test
+
+
+
+### Ports and services scan section
 nmap_process = Nmap(target, config_path, DEBUG)
 tools_object_dictionary['nmap'] = nmap_process
 commands_dictionary['nmap'] = nmap_process.command
@@ -59,7 +69,7 @@ if len(outputs_dictionary) != len(res):
 xml_output_order = xml_logger.get_output_order()
 for i in xml_output_order:
     try:
-        xml_logger.add_tool_log(i, outputs_dictionary[i])
+        xml_logger.add_tool_log(i, commands_dictionary[i], outputs_dictionary[i])
     except KeyError:
         print(f"tools_object_dictionary KeyError with key '{i}'")
     except Exception as e:
