@@ -4,6 +4,7 @@
 apt install whois
 
 # External tool installation
+# With project using golang, relative binary paths are used
 
 ## Snrublist3r installation
 rm -rf ~/BBP_sus_tools_base/
