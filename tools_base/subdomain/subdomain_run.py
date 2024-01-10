@@ -4,6 +4,9 @@ import subprocess
 import configparser
 from multiprocessing import Pool
 import functools
+from xml.etree import ElementTree as ET
+from lxml import etree
+import re
 
 from recon_exceptions import *
 from recon_utils import *
@@ -202,7 +205,8 @@ class SubdomainScanner:
         if self.debug:
             print(f"Subdomain tools outputs dict:\n{tools_outputs_dict}")
         # Save the subdomain tools logs
-        self.save_subdomain_tools_output_log(tools_outputs_dict, commands_dictionary)
+        subdomain_log_file_path = self.save_subdomain_tools_output_log(tools_outputs_dict, commands_dictionary)
+        self.filter_subdomain_tools_output(subdomain_log_file_path)
 
     def save_subdomain_tools_output_log(self, tools_outputs_dict, commands_dictionary):
         subdomain_logging = Logging(self.target, self.command_config_path, "subdomain")
@@ -217,6 +221,37 @@ class SubdomainScanner:
         # Save the subdomain tools log
         subdomain_log_file_path = subdomain_logging.save_log()
         print(f"Subdomain tools' outputs are saved to {subdomain_log_file_path}")
+        return subdomain_log_file_path
+
+    def filter_subdomain_tools_output(self, subdomains_tool_output):
+        # Read the log
+        parser = etree.XMLParser(recover=True,encoding='utf-8')
+        tree = ET.parse(subdomains_tool_output, parser=parser)
+        root = tree.getroot()
+        output_nodes_list = [] # This is for debugging
+        clean_output_list = []
+        subdomain_re_pattern = f"[\*\.a-z0-9\-]+\.{self.target}"
+        for child in root:
+            if "_output" in child.tag:
+                output_nodes_list.append(child.tag)
+                # if self.debug:
+                #     print(output_nodes_list)
+                if "subdomain_tools_log" in child.text and "log path" in child.text:
+                    regex_tool_log = re.search(r".*log path: (.*)\.subs", child.text)
+                    tool_output_log_path = ""
+                    if regex_tool_log:
+                        tool_output_log_path = regex_tool_log.group(1)
+                        tool_output_log_path = f"{tool_output_log_path}.subs"
+                    # print(tool_output_log_path)
+                    with open(tool_output_log_path, 'r') as text:
+                        tool_output = text.read()
+                    clean_output_list.append(filter_tool_output(tool_output, subdomain_re_pattern))
+                else:
+                    clean_output_list.append(filter_tool_output(tool_output, subdomain_re_pattern))
+
+        # Merge the clean output, sort, unique, and save to the main log
+        uniq_clean_output_list = sorted(set(clean_output_list))
+        
 
 def smap(f):
     """

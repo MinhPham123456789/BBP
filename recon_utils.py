@@ -1,6 +1,7 @@
 import configparser
 import shlex
 import subprocess
+import re
 from recon_exceptions import *
 
 def replace_target(command, target):
@@ -54,3 +55,9 @@ def check_command_existence(tool):
         return False
     else:
         return True
+
+def filter_tool_output(output, pattern):
+    # print(pattern)
+    # print(output)
+    matches_list = re.findall(pattern, output)
+    return matches_list
