@@ -20,18 +20,18 @@ class Snrublist3er:
     def run_command(self):
         if check_command_existence(self.tool):
             cmd = prepare_command(self.command)
-            print(cmd)
-            sub_proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            # https://stackoverflow.com/questions/803265/getting-realtime-output-using-subprocess
+            sub_proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            # https://stackoverflow.com/questions/1180606/using-subprocess-popen-for-process-with-large-output
             # long running time
             try:
-                output, errs = sub_proc.communicate()
+                # output, errs = sub_proc.communicate()
+                output = sub_proc.stdout.read()
             except Exception as e:
                 sub_proc.kill()
                 raise (e)
             else:
-                if 0 != sub_proc.returncode:
-                    raise ExecutionError('Error during command: "' + ' '.join(cmd) + '"\n\n' + errs.decode('utf8'))
+                if 0 != sub_proc.returncode and sub_proc.returncode is not None:
+                    raise ExecutionError('Error during command: "' + ' '.join(cmd) + '"\n\n' + output.decode('utf8'))
 
                 # Response is bytes so decode the output and return
                 self.output = f"Command: {self.command}\n{output.decode('utf8').strip()}" 

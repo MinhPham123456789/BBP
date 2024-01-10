@@ -23,7 +23,7 @@ class Logging:
         else:
             print(f"[Error] The Logging type '{self.log_type}' does not exist")
 
-        self.timestamp = datetime.today().strftime('%d-%B-%Y %H:%M:%S')
+        self.timestamp = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         xml_timestamp_node = ET.SubElement(self.root, 'TimeStamp')
         xml_timestamp_node.text = self.timestamp
         xml_target_node = ET.SubElement(self.root, 'Target Domain')
@@ -31,7 +31,7 @@ class Logging:
 
     def add_tool_log(self, tool_tag_name, expected_command, output):
         output_array = output.split("\n")
-        if output_array[0] != expected_command:
+        if output_array[0] in expected_command:
             print(f"[Error] Logging different command than the expected command for tool '{tool_tag_name}'")
         xml_tool_node = ET.SubElement(self.root, f"{tool_tag_name}_output", command=expected_command)
         xml_tool_node.text = "\n".join(output_array)

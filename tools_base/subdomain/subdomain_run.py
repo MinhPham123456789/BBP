@@ -9,6 +9,7 @@ from recon_exceptions import *
 from recon_utils import *
 from recon_logging import Logging
 from .snrublist3r_run import Snrublist3er
+from .chaos_run import Chaos
 
 ordered_subdomain_wordlists = [
     "bug-bounty-program-subdomains-trickest-inventory.txt",
@@ -59,8 +60,6 @@ class SubdomainScanner:
         self.merged_subdomain_wordlist = f"{self.subdomain_temp_wordlists_path}/{merged_wordlist_0_name}"
         self.merged_subdomain_wordlist1 = f"{self.subdomain_temp_wordlists_path}/{merged_wordlist_1_name}"
         merge_command = replace_place_holder(merge_command, "SUBDOMAIN_MERGE_WORDLIST", self.merged_subdomain_wordlist)
-        if self.debug:
-            print(f"Merged subdomain wordlist command: {merge_command}")
 
         self.tools_commands_dict = {
             "subdomains_merge": merge_command,
@@ -90,6 +89,8 @@ class SubdomainScanner:
             raise NotInstalledError()
 
     def build_subdomain_wordlists(self):
+        if self.debug:
+            print(f"Merged subdomain wordlist command: {self.tools_commands_dict['subdomains_merge']}")
         self.run_command("subdomains_merge")
         for index in range(0, len(ordered_subdomain_wordlists)):
             # Sort the wordlist in the list
@@ -167,11 +168,15 @@ class SubdomainScanner:
         tools_object_dictionary = {}
         commands_dictionary = {}
 
-        # Snrublist3r
+        # # Snrublist3r
         snrublist3r_process = Snrublist3er(self.target, self.command_config_path, self.debug)
         tools_object_dictionary['snrublist3r'] = snrublist3r_process
         commands_dictionary['snrublist3r'] = snrublist3r_process.command
 
+        # Chaos
+        chaos_process = Chaos(self.target, self.command_config_path, self.debug)
+        tools_object_dictionary['chaos'] = chaos_process
+        commands_dictionary['chaos'] = chaos_process.command
 
         processes = []
         for p in list(tools_object_dictionary.values()):
@@ -190,6 +195,8 @@ class SubdomainScanner:
             for tool in list(commands_dictionary.keys()):
                 if commands_dictionary[tool] in output_string:
                     tools_outputs_dict[tool] = output_string
+                    # tools_outputs_dict[tool] = f"{tools_outputs_dict[tool]}\nLog path: {tools_object_dictionary[tool].tool_log_path}"
+                    # tools_outputs_dict[tool] = f"{tools_outputs_dict[tool]}\nLog name: {tools_object_dictionary[tool].tool_log_name}"
                     break
 
         if self.debug:
