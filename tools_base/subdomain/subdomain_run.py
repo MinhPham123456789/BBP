@@ -7,12 +7,14 @@ import functools
 from xml.etree import ElementTree as ET
 from lxml import etree
 import re
+from datetime import datetime
 
 from recon_exceptions import *
 from recon_utils import *
 from recon_logging import Logging
 from .snrublist3r_run import Snrublist3er
 from .chaos_run import Chaos
+from .httpx_run import Httpx
 
 ordered_subdomain_wordlists = [
     "bug-bounty-program-subdomains-trickest-inventory.txt",
@@ -194,10 +196,17 @@ class SubdomainScanner:
 
         # Build the output dictionary
         tools_outputs_dict = {}
+        tools_log_path_dict = {}
         for output_string in res:
             for tool in list(commands_dictionary.keys()):
                 if commands_dictionary[tool] in output_string:
                     tools_outputs_dict[tool] = output_string
+                    regex_tool_log = re.search(r".*log path: (.*)\.subs", output_string)
+                    tool_output_log_path = ""
+                    if regex_tool_log:
+                        tool_output_log_path = regex_tool_log.group(1)
+                        tool_output_log_path = f"{tool_output_log_path}.subs"
+                        tools_log_path_dict[tool] = tool_output_log_path
                     # tools_outputs_dict[tool] = f"{tools_outputs_dict[tool]}\nLog path: {tools_object_dictionary[tool].tool_log_path}"
                     # tools_outputs_dict[tool] = f"{tools_outputs_dict[tool]}\nLog name: {tools_object_dictionary[tool].tool_log_name}"
                     break
@@ -205,8 +214,10 @@ class SubdomainScanner:
         if self.debug:
             print(f"Subdomain tools outputs dict:\n{tools_outputs_dict}")
         # Save the subdomain tools logs
+        httpx_output = self.filter_subdomain_tools_output_with_httpx(tools_log_path_dict)
+        tools_outputs_dict["httpx"] = httpx_output
         subdomain_log_file_path = self.save_subdomain_tools_output_log(tools_outputs_dict, commands_dictionary)
-        self.filter_subdomain_tools_output(subdomain_log_file_path)
+        
 
     def save_subdomain_tools_output_log(self, tools_outputs_dict, commands_dictionary):
         subdomain_logging = Logging(self.target, self.command_config_path, "subdomain")
@@ -223,34 +234,27 @@ class SubdomainScanner:
         print(f"Subdomain tools' outputs are saved to {subdomain_log_file_path}")
         return subdomain_log_file_path
 
-    def filter_subdomain_tools_output(self, subdomains_tool_output):
-        # Read the log
-        parser = etree.XMLParser(recover=True,encoding='utf-8')
-        tree = ET.parse(subdomains_tool_output, parser=parser)
-        root = tree.getroot()
-        output_nodes_list = [] # This is for debugging
-        clean_output_list = []
-        subdomain_re_pattern = f"[\*\.a-z0-9\-]+\.{self.target}"
-        for child in root:
-            if "_output" in child.tag:
-                output_nodes_list.append(child.tag)
-                # if self.debug:
-                #     print(output_nodes_list)
-                if "subdomain_tools_log" in child.text and "log path" in child.text:
-                    regex_tool_log = re.search(r".*log path: (.*)\.subs", child.text)
-                    tool_output_log_path = ""
-                    if regex_tool_log:
-                        tool_output_log_path = regex_tool_log.group(1)
-                        tool_output_log_path = f"{tool_output_log_path}.subs"
-                    # print(tool_output_log_path)
-                    with open(tool_output_log_path, 'r') as text:
-                        tool_output = text.read()
-                    clean_output_list.append(filter_tool_output(tool_output, subdomain_re_pattern))
-                else:
-                    clean_output_list.append(filter_tool_output(tool_output, subdomain_re_pattern))
-
+    def filter_subdomain_tools_output_with_httpx(self, tools_log_path_dict):
         # Merge the clean output, sort, unique, and save to the main log
-        uniq_clean_output_list = sorted(set(clean_output_list))
+        cmd = "sort"
+        log_base = get_env_values(self.command_config_path, "log", "base_path")
+        subdomain_tools_log_path = get_env_values(self.command_config_path, "log", "subdomain_tools_log_path")
+        tools_log_name = f"{log_base}/{self.target}/{subdomain_tools_log_path}/merged"
+        timestamp = datetime.today().strftime('%Y_%m_%dT%H_%M_%S')
+        for key in tools_log_path_dict:
+            tools_log_name = f"{tools_log_name}_{key}"
+            cmd = f"{cmd} {tools_log_path_dict[key]}"
+        tools_log_name = f"{tools_log_name}_{timestamp}.subs"
+        cmd = f"{cmd} | uniq > {tools_log_name}"
+        sub_proc = os.system(cmd)
+        if sub_proc == 0:
+            print(f"Merge subdomains from online db completed!")
+        else:
+            raise ExecutionError("Something went wrong with merging subdomains from online db tool")
+        
+        httpx_process = Httpx(self.target, self.command_config_path, self.debug)
+        httpx_log_output = httpx_process.run_command(tools_log_name)
+        return httpx_log_output
         
 
 def smap(f):

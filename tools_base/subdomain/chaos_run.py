@@ -1,5 +1,5 @@
 import shlex
-import os
+import subprocess
 from recon_exceptions import *
 from recon_utils import *
 from datetime import datetime
@@ -24,17 +24,19 @@ class Chaos:
         self.tool_log_name = f"{self.tool}_{timestamp}.subs"
         subdomain_tools_log_path = get_env_values(self.command_config_path, "log", "subdomain_tools_log_path")
         self.tool_log_path = f"{log_base}/{self.target}/{subdomain_tools_log_path}/{self.tool_log_name}"
-        self.command = f"{self.command} > {self.tool_log_path}"
+        self.command = f"{self.command} -o {self.tool_log_path}"
 
     def run_command(self):
         if check_command_existence(self.tool):
-            cmd = self.command
-            print(cmd)
-            sub_proc = os.system(cmd)
-            if sub_proc == 0:
+            cmd = prepare_command(self.command)
+            if self.debug:
+                print(self.command)
+            sub_proc = subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+            if sub_proc.returncode == 0:
+                print(f"[Process]{self.tool} completed!")
                 return f"Command: {self.command}\nChaos log path: {self.tool_log_path}\n Chaos log name: {self.tool_log_name}\n"
             else:
-                raise ExecutionError("Something wnet wrong with this Chaos tool")
+                raise ExecutionError("Something went wrong with this Chaos tool")
                 return f"Error during execution\n{self.tool_log_path} may not exist or empty"
         else:
             raise NotInstalledError()
