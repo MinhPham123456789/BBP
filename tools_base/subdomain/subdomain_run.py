@@ -15,6 +15,7 @@ from recon_logging import Logging
 from .snrublist3r_run import Snrublist3er
 from .chaos_run import Chaos
 from .httpx_run import Httpx
+from .gobuster_subdomain_run import GobusterSubdomain
 
 ordered_subdomain_wordlists = [
     "bug-bounty-program-subdomains-trickest-inventory.txt",
@@ -173,7 +174,7 @@ class SubdomainScanner:
         tools_object_dictionary = {}
         commands_dictionary = {}
 
-        # # Snrublist3r
+        # Snrublist3r
         snrublist3r_process = Snrublist3er(self.target, self.command_config_path, self.debug)
         tools_object_dictionary['snrublist3r'] = snrublist3r_process
         commands_dictionary['snrublist3r'] = snrublist3r_process.command
@@ -182,6 +183,11 @@ class SubdomainScanner:
         chaos_process = Chaos(self.target, self.command_config_path, self.debug)
         tools_object_dictionary['chaos'] = chaos_process
         commands_dictionary['chaos'] = chaos_process.command
+
+        # GobusterSubdomain
+        gobuster_subdomain_process = GobusterSubdomain(self.target, self.command_config_path, 2, self.debug)
+        tools_object_dictionary['gobuster_subdomain'] = gobuster_subdomain_process
+        commands_dictionary['gobuster_subdomain'] = gobuster_subdomain_process.command
 
         processes = []
         for p in list(tools_object_dictionary.values()):
@@ -195,6 +201,7 @@ class SubdomainScanner:
             print(res)
 
         # Build the output dictionary
+        exclude_tool_output = ["gobuster_subdomain"]
         tools_outputs_dict = {}
         tools_log_path_dict = {}
         for output_string in res:
@@ -203,7 +210,7 @@ class SubdomainScanner:
                     tools_outputs_dict[tool] = output_string
                     regex_tool_log = re.search(r".*log path: (.*)\.subs", output_string)
                     tool_output_log_path = ""
-                    if regex_tool_log:
+                    if tool not in exclude_tool_output and regex_tool_log:
                         tool_output_log_path = regex_tool_log.group(1)
                         tool_output_log_path = f"{tool_output_log_path}.subs"
                         tools_log_path_dict[tool] = tool_output_log_path
@@ -214,8 +221,10 @@ class SubdomainScanner:
         if self.debug:
             print(f"Subdomain tools outputs dict:\n{tools_outputs_dict}")
         # Save the subdomain tools logs
-        httpx_output = self.filter_subdomain_tools_output_with_httpx(tools_log_path_dict)
-        tools_outputs_dict["httpx"] = httpx_output
+        merge_brute_subdomains_log_name = self.merge_subdomain_tools_output(tools_log_path_dict)
+        # tools_outputs_dict["httpx"] = httpx_output
+        gobuster_validation_output = gobuster_subdomain_process.run_validation(merge_brute_subdomains_log_name)
+        tools_outputs_dict['gobuster_subdomain'] = f"{tools_outputs_dict['gobuster_subdomain']}\n{gobuster_validation_output}"
         subdomain_log_file_path = self.save_subdomain_tools_output_log(tools_outputs_dict, commands_dictionary)
         
 
@@ -234,7 +243,7 @@ class SubdomainScanner:
         print(f"Subdomain tools' outputs are saved to {subdomain_log_file_path}")
         return subdomain_log_file_path
 
-    def filter_subdomain_tools_output_with_httpx(self, tools_log_path_dict):
+    def merge_subdomain_tools_output(self, tools_log_path_dict):
         # Merge the clean output, sort, unique, and save to the main log
         cmd = "sort"
         log_base = get_env_values(self.command_config_path, "log", "base_path")
@@ -245,16 +254,24 @@ class SubdomainScanner:
             tools_log_name = f"{tools_log_name}_{key}"
             cmd = f"{cmd} {tools_log_path_dict[key]}"
         tools_log_name = f"{tools_log_name}_{timestamp}.subs"
-        cmd = f"{cmd} | uniq > {tools_log_name}"
-        sub_proc = os.system(cmd)
+        cmd1 = f"{cmd} | uniq > {tools_log_name}"
+        sub_proc = os.system(cmd1)
         if sub_proc == 0:
             print(f"Merge subdomains from online db completed!")
         else:
             raise ExecutionError("Something went wrong with merging subdomains from online db tool")
         
-        httpx_process = Httpx(self.target, self.command_config_path, self.debug)
-        httpx_log_output = httpx_process.run_command(tools_log_name)
-        return httpx_log_output
+        cmd2 = f"{cmd} | uniq | sed 's/.{self.target}//g' > {tools_log_name}.brute"
+        sub_proc = os.system(cmd2)
+        if sub_proc == 0:
+            print(f"Merge BRUTE subdomains from online db completed!")
+        else:
+            raise ExecutionError("Something went wrong with merging BRUTE subdomains from online db tool")
+        
+        # httpx is very slow on validating the DNS
+        # httpx_process = Httpx(self.target, self.command_config_path, self.debug)
+        # httpx_log_output = httpx_process.run_command(tools_log_name)
+        return f"{tools_log_name}.brute"
         
 
 def smap(f):

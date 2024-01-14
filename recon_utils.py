@@ -47,7 +47,7 @@ def check_command_existence(tool):
         return False
     else:
         if 0 != sub_proc.returncode:
-            raise ExecutionError("Error in where command: " + errs.decode('utf8'))
+            raise ExecutionError("Error in which command: " + errs.decode('utf8'))
     
     clean_output = output.decode('utf8').strip()
     if "not found" in clean_output:
