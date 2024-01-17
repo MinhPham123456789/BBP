@@ -62,7 +62,7 @@ def filter_tool_output(output, pattern):
     matches_list = re.findall(pattern, output)
     return matches_list
 
-def count_web_crawling_output(output_log_path, debug):
+def count_web_crawling_output(output_log_path, debug=False):
     output_count_dict = {}
     # URLs
     cmd = f"grep -E '(\[url\]|\[robots\]) .*' {output_log_path} | grep -v '?' | wc -l"
