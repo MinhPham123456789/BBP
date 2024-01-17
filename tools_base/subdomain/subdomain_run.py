@@ -43,7 +43,7 @@ class SubdomainScanner:
     """
     This class initiates an object to merge subdomain wordlists using bash commands inside python
     """
-    def __init__(self, target, command_config_path, debug=False):
+    def __init__(self, target, command_config_path, timestamp, number_of_wordlists=1, debug=False):
         """
         The current plan is
         Change the tools and commands to list because this class will involve the usage of multiple tools to get the last result
@@ -56,7 +56,10 @@ class SubdomainScanner:
         self.subdomain_wordlists_path = get_env_values(self.command_config_path, "temp", "subdomain_wordlists_path")
         self.subdomain_temp_wordlists_path = get_env_values(self.command_config_path, "temp", "subdomain_temp_path")
         self.timeout = 100
+        self.timestamp = timestamp
         self.debug = debug
+        self.number_of_wordlists = number_of_wordlists
+        self.command = "Subdomain Discovery Commands"
 
         # Merge command
         merge_command = get_command(self.command_config_path, "subdomain_merge")
@@ -173,19 +176,21 @@ class SubdomainScanner:
         """
         tools_object_dictionary = {}
         commands_dictionary = {}
+        # Initiating subdomain logging directory
+        self.subdomain_logging = Logging(self.target, self.command_config_path, self.timestamp, "subdomain")
 
         # Snrublist3r
-        snrublist3r_process = Snrublist3er(self.target, self.command_config_path, self.debug)
+        snrublist3r_process = Snrublist3er(self.target, self.command_config_path, self.timestamp, self.debug)
         tools_object_dictionary['snrublist3r'] = snrublist3r_process
         commands_dictionary['snrublist3r'] = snrublist3r_process.command
 
         # Chaos
-        chaos_process = Chaos(self.target, self.command_config_path, self.debug)
+        chaos_process = Chaos(self.target, self.command_config_path, self.timestamp, self.debug)
         tools_object_dictionary['chaos'] = chaos_process
         commands_dictionary['chaos'] = chaos_process.command
 
         # GobusterSubdomain
-        gobuster_subdomain_process = GobusterSubdomain(self.target, self.command_config_path, 2, self.debug)
+        gobuster_subdomain_process = GobusterSubdomain(self.target, self.command_config_path, self.timestamp, self.number_of_wordlists, self.debug)
         tools_object_dictionary['gobuster_subdomain'] = gobuster_subdomain_process
         commands_dictionary['gobuster_subdomain'] = gobuster_subdomain_process.command
 
@@ -227,19 +232,23 @@ class SubdomainScanner:
         tools_outputs_dict['gobuster_subdomain'] = f"{tools_outputs_dict['gobuster_subdomain']}\n{gobuster_validation_output}"
         subdomain_log_file_path = self.save_subdomain_tools_output_log(tools_outputs_dict, commands_dictionary)
         
+        print("[Process] Subdomain Discovery completed!")
+        subdomain_discovery_output = f"Command: {self.command}\nDiscovered and validated subdomains list:\n{tools_outputs_dict['gobuster_subdomain']}"
+        subdomain_discovery_output = f"{subdomain_discovery_output}\n\nSubdomain Discovery log: {subdomain_log_file_path}\n"
+        return subdomain_discovery_output
+
 
     def save_subdomain_tools_output_log(self, tools_outputs_dict, commands_dictionary):
-        subdomain_logging = Logging(self.target, self.command_config_path, "subdomain")
         for tool_name in tools_outputs_dict:
             try:
-                subdomain_logging.add_tool_log(tool_name, commands_dictionary[tool_name], tools_outputs_dict[tool_name])
+                self.subdomain_logging.add_tool_log(tool_name, commands_dictionary[tool_name], tools_outputs_dict[tool_name])
             except KeyError:
                 print(f"tools_object_dictionary KeyError with key '{tool_name}'")
             except Exception as e:
                 print(f"[Unknown error] message: {e}")
 
         # Save the subdomain tools log
-        subdomain_log_file_path = subdomain_logging.save_log()
+        subdomain_log_file_path = self.subdomain_logging.save_log()
         print(f"Subdomain tools' outputs are saved to {subdomain_log_file_path}")
         return subdomain_log_file_path
 
@@ -249,11 +258,10 @@ class SubdomainScanner:
         log_base = get_env_values(self.command_config_path, "log", "base_path")
         subdomain_tools_log_path = get_env_values(self.command_config_path, "log", "subdomain_tools_log_path")
         tools_log_name = f"{log_base}/{self.target}/{subdomain_tools_log_path}/merged"
-        timestamp = datetime.today().strftime('%Y_%m_%dT%H_%M_%S')
         for key in tools_log_path_dict:
             tools_log_name = f"{tools_log_name}_{key}"
             cmd = f"{cmd} {tools_log_path_dict[key]}"
-        tools_log_name = f"{tools_log_name}_{timestamp}.subs"
+        tools_log_name = f"{tools_log_name}_{self.timestamp}.subs"
         cmd1 = f"{cmd} | uniq > {tools_log_name}"
         sub_proc = os.system(cmd1)
         if sub_proc == 0:

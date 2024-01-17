@@ -8,7 +8,7 @@ class Snrublist3er:
     """
     This class initiates an object to carry out snrublist3r tool inside python
     """
-    def __init__(self, target, command_config_path, debug=False):
+    def __init__(self, target, command_config_path, timestamp, debug=False):
         self.target = target
         self.tool = "snrublist3r"
         self.command_config_path = command_config_path
@@ -16,12 +16,12 @@ class Snrublist3er:
         self.command = replace_target(self.command, self.target)
         self.timeout = 10
         self.output = ""
+        self.timestamp = timestamp
         self.debug = debug
 
         # Set up the tool log path, due to snrublist3r does not pipeline in shell
         log_base = get_env_values(self.command_config_path, "log", "base_path")
-        timestamp = datetime.today().strftime('%Y_%m_%dT%H_%M_%S')
-        self.tool_log_name = f"{self.tool}_{timestamp}.subs"
+        self.tool_log_name = f"{self.tool}_{self.timestamp}.subs"
         subdomain_tools_log_path = get_env_values(self.command_config_path, "log", "subdomain_tools_log_path")
         self.tool_log_path = f"{log_base}/{self.target}/{subdomain_tools_log_path}/{self.tool_log_name}"
         self.command = f"{self.command} -o {self.tool_log_path}"

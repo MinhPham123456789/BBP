@@ -6,10 +6,12 @@ from recon_logging import Logging
 from recon_version_control import VersionControl
 import functools
 from multiprocessing import Pool
+from datetime import datetime
 
 config_path = "./recon.config"
-target = "google.com"
+target = "rei.com"
 DEBUG = True
+master_timestamp = datetime.today().strftime('%Y_%m_%dT%H_%M_%S')
 
 def smap(f):
     """
@@ -18,34 +20,29 @@ def smap(f):
     return f()
 
 ### Init section
-xml_logger = Logging(target, config_path)
+xml_logger = Logging(target, config_path, master_timestamp)
 tools_object_dictionary = {}
 commands_dictionary = {}
 
 ### Domain Intelligence Gather section
-whois_process = Whois(target, config_path, DEBUG)
+whois_process = Whois(target, config_path, master_timestamp)
 tools_object_dictionary['whois'] = whois_process
 commands_dictionary['whois'] = whois_process.command
 # whois_output = whois_process.run_command()
 
-nslookup_process = Nslookup(target, config_path, DEBUG)
+nslookup_process = Nslookup(target, config_path, master_timestamp)
 tools_object_dictionary['nslookup'] = nslookup_process
 commands_dictionary['nslookup'] = nslookup_process.command
 
-### Subdomain section
-# Note: Rebuild the subdomain wordlists is in recon_test
-
-
-
 ### Ports and services scan section
-nmap_process = Nmap(target, config_path, DEBUG)
+nmap_process = Nmap(target, config_path, master_timestamp)
 tools_object_dictionary['nmap'] = nmap_process
 commands_dictionary['nmap'] = nmap_process.command
 # nmap_output = nmap_process.run_command()
 
 processes = []
-for p in list(tools_object_dictionary.values()):
-    processes.append(functools.partial(p.run_command))
+for tool_name in tools_object_dictionary:
+    processes.append(functools.partial(tools_object_dictionary[tool_name].run_command))
 
 pool = Pool(processes=len(tools_object_dictionary))
 res = pool.map(smap, processes)
@@ -54,7 +51,7 @@ pool.join()
 if DEBUG:
     print(res)
 
-### Build the outputs dictionary
+### Build the outputs dictionary information gathering
 outputs_dictionary = {}
 for output_string in res:
     for cmd_key in list(commands_dictionary.keys()):
@@ -64,6 +61,18 @@ for output_string in res:
 
 if len(outputs_dictionary) != len(res):
     print("[ALERT] THE EXPECTED OUTPUT AND THE PROCESS POOL'S OUTPUT LIST DO NOT HAVE THE SAME LENGTH!!!")
+
+### Subdomain section
+
+# Note: Rebuild the subdomain wordlists is in recon_test
+subdomain_process = SubdomainScanner(target, config_path, master_timestamp, 2, DEBUG)
+
+# Build the subdomain wordlist
+# subdomain_process.build_subdomain_wordlists()
+
+tools_object_dictionary['subdomain'] = subdomain_process
+outputs_dictionary['subdomain'] = subdomain_process.run_subdomain_discovery()
+commands_dictionary['subdomain'] = subdomain_process.command
 
 ### Logging section
 xml_output_order = xml_logger.get_output_order()

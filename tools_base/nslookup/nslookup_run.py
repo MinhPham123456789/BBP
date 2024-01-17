@@ -9,7 +9,7 @@ class Nslookup:
     """
     This class initiates an object to carry out nslookup commands inside python
     """
-    def __init__(self, target, command_config_path, debug=False):
+    def __init__(self, target, command_config_path, timestamp, debug=False):
         self.target = target
         self.tool = "nslookup"
         self.command_config_path = command_config_path
@@ -17,6 +17,7 @@ class Nslookup:
         self.command = replace_target(self.command, self.target)
         self.timeout = 10
         self.output = ""
+        self.timestamp = timestamp
         self.debug = debug
         
     def run_command(self):

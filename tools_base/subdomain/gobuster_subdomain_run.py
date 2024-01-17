@@ -9,7 +9,7 @@ class GobusterSubdomain:
     """
     This class initiates an object to carry out snrublist3r tool to brute force subdomains inside python
     """
-    def __init__(self, target, command_config_path, number_of_wordlists=1, debug=False):
+    def __init__(self, target, command_config_path, timestamp, number_of_wordlists=1, debug=False):
         self.target = target
         self.tool = "gobuster_subdomain"
         self.command_config_path = command_config_path
@@ -18,14 +18,14 @@ class GobusterSubdomain:
         self.original_command = self.command
         self.timeout = 10
         self.output = ""
+        self.timestamp = timestamp
         self.subdomain_temp_wordlists_path = get_env_values(self.command_config_path, "temp", "subdomain_temp_path")
         self.debug = debug
         self.number_of_wordlists = number_of_wordlists
 
         # Set up the tool log path
         log_base = get_env_values(self.command_config_path, "log", "base_path")
-        timestamp = datetime.today().strftime('%Y_%m_%dT%H_%M_%S')
-        self.tool_log_name = f"{self.tool}_{timestamp}.subs"
+        self.tool_log_name = f"{self.tool}_{self.timestamp}.subs"
         subdomain_tools_log_path = get_env_values(self.command_config_path, "log", "subdomain_tools_log_path")
         self.tool_log_path = f"{log_base}/{self.target}/{subdomain_tools_log_path}/{self.tool_log_name}"
         self.command = f"{self.command} -o {self.tool_log_path}"
@@ -37,12 +37,12 @@ class GobusterSubdomain:
             subdomain_wordlists = sorted(subdomain_wordlists)          
             # Prepare cat them up
             prefix_cmd = "cat"
-            for wl in subdomain_wordlists[:self.number_of_wordlists - 1]:
+            for wl in subdomain_wordlists[:self.number_of_wordlists]:
                 prefix_cmd = f"{prefix_cmd} {self.subdomain_temp_wordlists_path}/{wl}"
-            # if self.debug:
-            #     prefix_cmd = "cat"
-            #     for wl in subdomain_wordlists[1:3]:
-            #         prefix_cmd = f"{prefix_cmd} {self.subdomain_temp_wordlists_path}/{wl}"
+            if self.debug:
+                prefix_cmd = "cat"
+                for wl in subdomain_wordlists[1:3]:
+                    prefix_cmd = f"{prefix_cmd} {self.subdomain_temp_wordlists_path}/{wl}"
 
             self.command = f"{prefix_cmd} | {self.command} -w -"
             cmd = prepare_command(self.command)
@@ -63,8 +63,7 @@ class GobusterSubdomain:
         cmd = self.original_command
         # Set up log path
         log_base = get_env_values(self.command_config_path, "log", "base_path")
-        timestamp = datetime.today().strftime('%Y_%m_%dT%H_%M_%S')
-        tool_log_name = f"{self.tool}_merged_{timestamp}.subs.brute"
+        tool_log_name = f"{self.tool}_merged_{self.timestamp}.subs.brute"
         subdomain_tools_log_path = get_env_values(self.command_config_path, "log", "subdomain_tools_log_path")
         tool_log_path = f"{log_base}/{self.target}/{subdomain_tools_log_path}/{tool_log_name}"
         cmd = f"{cmd} -o {tool_log_path} -w {brute_subdomain_log}"
