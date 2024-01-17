@@ -7,7 +7,6 @@ import functools
 from xml.etree import ElementTree as ET
 from lxml import etree
 import re
-from datetime import datetime
 
 from recon_exceptions import *
 from recon_utils import *

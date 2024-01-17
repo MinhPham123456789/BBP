@@ -34,9 +34,9 @@ class Chaos:
             sub_proc = subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
             if sub_proc.returncode == 0:
                 print(f"[Process]{self.tool} completed!")
-                return f"Command: {self.command}\nChaos log path: {self.tool_log_path}\n Chaos log name: {self.tool_log_name}\n"
+                return f"Command: {self.command}\n{self.tool} log path: {self.tool_log_path}\n{self.tool} log name: {self.tool_log_name}\n"
             else:
-                raise ExecutionError("Something went wrong with this Chaos tool")
+                raise ExecutionError(f"Something went wrong with this {self.tool} tool")
                 return f"Error during execution\n{self.tool_log_path} may not exist or empty"
         else:
             raise NotInstalledError()
