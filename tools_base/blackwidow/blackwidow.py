@@ -440,7 +440,7 @@ def exit_handler():
     os.system("rm -f " + save_dir + domain + "_" + port + "-urls.txt")
     os.system("rm -f " + save_dir + domain + "_" + port + "-subdomains.txt")
     os.system("rm -f /tmp/" + domain + "_" + port + "-urls.txt 2> /dev/null")
-    os.system("rm -rf ./log/*")
+    os.system(f"rm -rf {blackwidow_base_log_dir}*")
 
     if scan == "y":
         os.system(
@@ -561,7 +561,8 @@ else:
         else:
             port = port
 
-    save_dir = "./log/" + domain + "_" + port + "/"
+    blackwidow_base_log_dir = "./tools_base/blackwidow/log/"
+    save_dir = blackwidow_base_log_dir + domain + "_" + port + "/"
     os.system("mkdir -p " + save_dir + " 2>/dev/null")
     atexit.register(exit_handler)
 

@@ -19,13 +19,13 @@ class Blackwidow:
         self.debug = debug
         self.params_temp_path = get_env_values(self.command_config_path, "temp", "params_temp_path")
 
-    def set_subdomain_targer(subdomain_target):
+    def set_subdomain_targer(self, subdomain_target):
         self.subdomain_target = subdomain_target
 
     def run_probe(self):
         if check_command_existence(self.tool):
             # Set temp log path
-            temp_log_name = f"{self.tool}_{self.timestamp}.log"
+            temp_log_name = f"{self.tool}_{self.subdomain_target}_{self.timestamp}.log"
             temp_log_path = f"{self.params_temp_path}/{temp_log_name}"
             
             # Check temp log existence
@@ -40,13 +40,12 @@ class Blackwidow:
             sub_proc = os.system(cmd)
             if sub_proc == 0:
                 print(f"[Process]{self.tool} completed!")
-                output_count_dict = count_web_crawling_output(temp_log_path, self.debug)
-                output = {
-                    self.subdomain_target: output_count_dict
-                }
+                output_count_dict = count_web_crawling_output(temp_log_path, self.subdomain_target, self.debug)
+                output_count_dict['tool'] = self.tool
+                output_count_dict['command'] = cmd
                 if not self.debug:
                     os.system(f"rm -rf {temp_log_path}")
-                return output
+                return output_count_dict
 
             else:
                 raise ExecutionError(f"Something went wrong with this {self.tool} tool")

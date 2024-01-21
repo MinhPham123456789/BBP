@@ -19,6 +19,10 @@ class Logging:
             subdomain_tools_log_path = get_env_values(self.config_path, 'log', 'subdomain_tools_log_path')
             self.target_dir = f"{self.base_dir}/{target_name}/{subdomain_tools_log_path}"
             self.root = ET.Element("SubdomainToolsLog")
+        elif self.log_type == "params":
+            params_tools_log_path = get_env_values(self.config_path, 'log', 'params_tools_log_path')
+            self.target_dir = f"{self.base_dir}/{target_name}/{params_tools_log_path}"
+            self.root = ET.Element("ParamsToolsLog")
         else:
             print(f"[Error] The Logging type '{self.log_type}' does not exist")
 
@@ -54,8 +58,4 @@ class Logging:
     def get_target_logs_dir(self):
         return self.target_dir
 
-def get_log_path(config_path):
-    config = configparser.ConfigParser()
-    config.read(config_path)
-    log_base_path = config['log']['base_path']
-    return log_base_path
+
