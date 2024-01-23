@@ -12,6 +12,16 @@ mkdir ~/BBP_sus_tools_base
 cd ~/BBP_sus_tools_base
 git clone https://github.com/b3n-j4m1n/snrublist3r.git
 pip install -r ./snrublist3r/requirements.txt
+
+## paramspider
+git clone https://github.com/devanshbatham/ParamSpider.git
+
+## DomainTrail
+git clone https://github.com/gatete/DomainTrail.git
+
 ## Chaos ProjectDiscovery
 go install -v github.com/projectdiscovery/chaos-client/cmd/chaos@latest
 # Note: Add export CHAOS_KEY=CHAOS_API_KEY in bash profile script
+## gopsider
+sudo apt install gospider
+

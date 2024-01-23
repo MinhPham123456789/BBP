@@ -8,6 +8,7 @@ cffi==1.16.0
 charset-normalizer==3.3.2
 colorama==0.4.6
 cprint==1.2.2
+dnspython==2.5.0
 filelock==3.13.1
 gobject==0.1.0
 h11==0.14.0

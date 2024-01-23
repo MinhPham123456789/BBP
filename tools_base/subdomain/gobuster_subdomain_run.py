@@ -25,7 +25,7 @@ class GobusterSubdomain:
 
         # Set up the tool log path
         log_base = get_env_values(self.command_config_path, "log", "base_path")
-        self.tool_log_name = f"{self.tool}_{self.timestamp}.subs"
+        self.tool_log_name = f"{self.tool}_brute_{self.timestamp}.subs"
         subdomain_tools_log_path = get_env_values(self.command_config_path, "log", "subdomain_tools_log_path")
         self.tool_log_path = f"{log_base}/{self.target}/{subdomain_tools_log_path}/{self.tool_log_name}"
         self.command = f"{self.command} -o {self.tool_log_path}"
@@ -39,10 +39,10 @@ class GobusterSubdomain:
             prefix_cmd = "cat"
             for wl in subdomain_wordlists[:self.number_of_wordlists]:
                 prefix_cmd = f"{prefix_cmd} {self.subdomain_temp_wordlists_path}/{wl}"
-            if self.debug:
-                prefix_cmd = "cat"
-                for wl in subdomain_wordlists[1:3]:
-                    prefix_cmd = f"{prefix_cmd} {self.subdomain_temp_wordlists_path}/{wl}"
+            # if self.debug:
+            #     prefix_cmd = "cat"
+            #     for wl in subdomain_wordlists[1:3]:
+            #         prefix_cmd = f"{prefix_cmd} {self.subdomain_temp_wordlists_path}/{wl}"
 
             self.command = f"{prefix_cmd} | {self.command} -w -"
             cmd = prepare_command(self.command)
@@ -63,7 +63,7 @@ class GobusterSubdomain:
         cmd = self.original_command
         # Set up log path
         log_base = get_env_values(self.command_config_path, "log", "base_path")
-        tool_log_name = f"{self.tool}_merged_{self.timestamp}.subs.brute"
+        tool_log_name = f"{self.tool}_validated_merged_{self.timestamp}.subs.brute"
         subdomain_tools_log_path = get_env_values(self.command_config_path, "log", "subdomain_tools_log_path")
         tool_log_path = f"{log_base}/{self.target}/{subdomain_tools_log_path}/{tool_log_name}"
         cmd = f"{cmd} -o {tool_log_path} -w {brute_subdomain_log}"

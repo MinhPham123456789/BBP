@@ -15,6 +15,7 @@ from .snrublist3r_run import Snrublist3er
 from .chaos_run import Chaos
 from .httpx_run import Httpx
 from .gobuster_subdomain_run import GobusterSubdomain
+from .domaintrail_run import Domaintrail
 
 ordered_subdomain_wordlists = [
     "deepmagic.com-prefixes-top500.txt",
@@ -68,6 +69,7 @@ class SubdomainScanner:
         self.merged_subdomain_wordlist = f"{self.subdomain_temp_wordlists_path}/{merged_wordlist_0_name}"
         self.merged_subdomain_wordlist1 = f"{self.subdomain_temp_wordlists_path}/{merged_wordlist_1_name}"
         merge_command = replace_place_holder(merge_command, "SUBDOMAIN_MERGE_WORDLIST", self.merged_subdomain_wordlist)
+        merge_command = f"{merge_command}; wc -l {self.merged_subdomain_wordlist}"
 
         self.tools_commands_dict = {
             "subdomains_merge": merge_command,
@@ -89,14 +91,14 @@ class SubdomainScanner:
                 # Response is bytes so decode the output and return
                 clean_output = output.decode('utf8').strip()
                 self.output = f"Command: {tool_name}\n{clean_output}"
-                print(f"[Process]{tool_name} completed!")
-                if self.debug:
-                    print(self.output)
+                print(f"[Process]{tool_name} completed!\n{self.output}")
                 return self.output
         else:
             raise NotInstalledError()
 
     def build_subdomain_wordlists(self):
+        if not os.path.exists(self.subdomain_temp_wordlists_path):
+            os.makedirs(self.subdomain_temp_wordlists_path)
         if self.debug:
             print(f"Merged subdomain wordlist command: {self.tools_commands_dict['subdomains_merge']}")
         self.run_command("subdomains_merge")
@@ -160,6 +162,7 @@ class SubdomainScanner:
                 # output = f"Command: {cmd1}\n{clean_output}"
                 # if self.debug:
                 #     print(output)
+        os.system(f"rm {self.subdomain_wordlists_path}/sorted_*")
         print(f"[Process]Rebuild the subdomain wordlists in {self.subdomain_temp_wordlists_path} completed!")
 
     def run_subdomain_discovery(self):
@@ -188,6 +191,11 @@ class SubdomainScanner:
         tools_object_dictionary['chaos'] = chaos_process
         commands_dictionary['chaos'] = chaos_process.command
 
+        # DomainTrail
+        domaintrail_process = Domaintrail(self.target, self.command_config_path, self.timestamp, self.debug)
+        tools_object_dictionary['domaintrail'] = domaintrail_process
+        commands_dictionary['domaintrail'] = domaintrail_process.command
+
         # GobusterSubdomain
         gobuster_subdomain_process = GobusterSubdomain(self.target, self.command_config_path, self.timestamp, self.number_of_wordlists, self.debug)
         tools_object_dictionary['gobuster_subdomain'] = gobuster_subdomain_process
@@ -196,7 +204,7 @@ class SubdomainScanner:
         processes = []
         for p in list(tools_object_dictionary.values()):
             processes.append(functools.partial(p.run_command))
-        
+
         pool = Pool(processes=len(tools_object_dictionary))
         res = pool.map(smap, processes)
         pool.close()

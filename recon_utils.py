@@ -30,7 +30,7 @@ def prepare_command(command):
         return shlex_command
 
 command_whitelist = ["subdomains_merge"]
-external_tools = ["snrublist3r", "chaos", "httpx", "blackwidow", "paramspider"]
+external_tools = ["snrublist3r", "chaos", "httpx", "blackwidow", "paramspider", "domaintrail"]
 
 def check_command_existence(tool):
     if tool in command_whitelist:
@@ -47,7 +47,7 @@ def check_command_existence(tool):
         return False
     else:
         if 0 != sub_proc.returncode:
-            raise ExecutionError("Error in which command: " + errs.decode('utf8'))
+            raise ExecutionError(f"Command {tool} does not exist. Error in which command: " + errs.decode('utf8'))
     
     clean_output = output.decode('utf8').strip()
     if "not found" in clean_output:
