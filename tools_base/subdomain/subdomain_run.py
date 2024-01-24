@@ -11,6 +11,7 @@ import re
 from recon_exceptions import *
 from recon_utils import *
 from recon_logging import Logging
+from recon_version_control import VersionControl
 from .snrublist3r_run import Snrublist3er
 from .chaos_run import Chaos
 from .httpx_run import Httpx
@@ -242,6 +243,15 @@ class SubdomainScanner:
         print("[Process] Subdomain Discovery completed!")
         subdomain_discovery_output = f"Command: {self.command}\nDiscovered and validated subdomains list:\n{tools_outputs_dict['gobuster_subdomain']}"
         subdomain_discovery_output = f"{subdomain_discovery_output}\n\nSubdomain Discovery log: {subdomain_log_file_path}\n"
+        
+        # Version control subdomain brute
+        brute_version_control = VersionControl(self.command_config_path, self.subdomain_logging.get_target_logs_dir(), gobuster_subdomain_process.tool_log_path, "subdomain_brute", True)
+        brute_version_control.compare_version()
+        # Version control subdomain validate
+        gobuster_validate_log_path = re.search(r"log path: (.*?)\n", gobuster_validation_output).group(1)
+        validate_version_control = VersionControl(self.command_config_path, self.subdomain_logging.get_target_logs_dir(), gobuster_validate_log_path, "subdomain_validate", True)
+        validate_version_control.compare_version()
+        
         return subdomain_discovery_output
 
 

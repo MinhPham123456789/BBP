@@ -11,7 +11,7 @@ from datetime import datetime
 
 config_path = "./recon.config"
 target = "rei.com"
-DEBUG = True
+DEBUG = not True
 master_timestamp = datetime.today().strftime('%Y_%m_%dT%H_%M_%S')
 
 def smap(f):
@@ -89,7 +89,7 @@ log_file_path = xml_logger.save_log()
 print(f"Outputs are saved to {log_file_path}")
 
 ### Version control section
-version_controller = VersionControl(xml_logger.get_target_logs_dir(), log_file_path.split("/")[-1], DEBUG)
+version_controller = VersionControl(config_path, xml_logger.get_target_logs_dir(), log_file_path.split("/")[-1], "main", DEBUG)
 if DEBUG:
     print(version_controller.previous_log_name)
     print(version_controller.new_log_name)

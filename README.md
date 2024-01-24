@@ -17,6 +17,7 @@ This project aims to integrate external pentesting tools into a reconnaissance s
 ### Subdomain Enumeration
 + Use `chaos` to get records of subdomains of the target's domain name from the ProjectDiscovery database (https://github.com/projectdiscovery/chaos-client)
 + Use `snrublist3r` to get records of subdomains of the target's domain name from 15 different resources (https://github.com/b3n-j4m1n/snrublist3r)
++ Use `domaintrail` to get records of subdomains of the target's domain name from 10 different resources may overlap with `snrublist3r` (https://github.com/gatete/DomainTrail)
 + Use `gobuster` to validate the collected subdomain records from the databases and brute force subdomains using wordlist (https://github.com/OJ/gobuster)
 
 ### Web crawling and parameter discovery
