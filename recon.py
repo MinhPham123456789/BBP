@@ -89,8 +89,13 @@ log_file_path = xml_logger.save_log()
 print(f"Outputs are saved to {log_file_path}")
 
 ### Version control section
-version_controller = VersionControl(config_path, xml_logger.get_target_logs_dir(), log_file_path.split("/")[-1], "main", DEBUG)
+version_controller_display = VersionControl(config_path, xml_logger.get_target_logs_dir(), log_file_path.split("/")[-1], "main", DEBUG)
+version_controller_display.compare_version()
+
 if DEBUG:
     print(version_controller.previous_log_name)
     print(version_controller.new_log_name)
-version_controller.compare_version()
+
+version_controller_sorted = VersionControl(config_path, xml_logger.get_target_logs_dir(), log_file_path.split("/")[-1], "main_sorted", DEBUG)
+version_control_log_path_name = version_controller_sorted.compare_version()
+version_controller_sorted.send_noti(version_control_log_path_name)
