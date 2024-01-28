@@ -29,7 +29,6 @@ commands_dictionary = {}
 whois_process = Whois(target, config_path, master_timestamp)
 tools_object_dictionary['whois'] = whois_process
 commands_dictionary['whois'] = whois_process.command
-# whois_output = whois_process.run_command()
 
 nslookup_process = Nslookup(target, config_path, master_timestamp)
 tools_object_dictionary['nslookup'] = nslookup_process
@@ -39,7 +38,6 @@ commands_dictionary['nslookup'] = nslookup_process.command
 nmap_process = Nmap(target, config_path, master_timestamp)
 tools_object_dictionary['nmap'] = nmap_process
 commands_dictionary['nmap'] = nmap_process.command
-# nmap_output = nmap_process.run_command()
 
 processes = []
 for tool_name in tools_object_dictionary:
@@ -89,13 +87,16 @@ log_file_path = xml_logger.save_log()
 print(f"Outputs are saved to {log_file_path}")
 
 ### Version control section
-version_controller_display = VersionControl(config_path, xml_logger.get_target_logs_dir(), log_file_path.split("/")[-1], "main", DEBUG)
+version_controller_display = VersionControl(config_path, xml_logger.get_target_logs_dir(), log_file_path.split("/")[-1], "main_display", DEBUG)
 version_controller_display.compare_version()
 
-if DEBUG:
-    print(version_controller.previous_log_name)
-    print(version_controller.new_log_name)
+# if DEBUG:
+#     print(version_controller.previous_log_name)
+#     print(version_controller.new_log_name)
 
 version_controller_sorted = VersionControl(config_path, xml_logger.get_target_logs_dir(), log_file_path.split("/")[-1], "main_sorted", DEBUG)
-version_control_log_path_name = version_controller_sorted.compare_version()
+try:
+    version_control_log_path_name = version_controller_sorted.compare_version()
+except TypeError:
+    print("No new cersion control log to scan for changes")
 version_controller_sorted.send_noti(version_control_log_path_name)

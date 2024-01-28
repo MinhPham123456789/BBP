@@ -30,7 +30,9 @@ def prepare_command(command):
         return shlex_command
 
 command_whitelist = ["subdomains_merge"]
-external_tools = ["snrublist3r", "chaos", "httpx", "blackwidow", "paramspider", "domaintrail"]
+external_tools = ["snrublist3r", "chaos", "httpx", "blackwidow", "paramspider", "domaintrail",
+                  "hakrawler", "waybackurls", "gau", "katana"
+                 ]
 
 def check_command_existence(tool):
     if tool in command_whitelist:

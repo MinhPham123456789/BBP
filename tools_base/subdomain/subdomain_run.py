@@ -245,11 +245,11 @@ class SubdomainScanner:
         subdomain_discovery_output = f"{subdomain_discovery_output}\n\nSubdomain Discovery log: {subdomain_log_file_path}\n"
         
         # Version control subdomain brute
-        brute_version_control = VersionControl(self.command_config_path, self.subdomain_logging.get_target_logs_dir(), gobuster_subdomain_process.tool_log_path, "subdomain_brute", True)
+        brute_version_control = VersionControl(self.command_config_path, self.subdomain_logging.get_target_logs_dir(), gobuster_subdomain_process.tool_log_path, "subdomain_sorted_brute", True)
         brute_version_control.compare_version()
         # Version control subdomain validate
         gobuster_validate_log_path = re.search(r"log path: (.*?)\n", gobuster_validation_output).group(1)
-        validate_version_control = VersionControl(self.command_config_path, self.subdomain_logging.get_target_logs_dir(), gobuster_validate_log_path, "subdomain_validate", True)
+        validate_version_control = VersionControl(self.command_config_path, self.subdomain_logging.get_target_logs_dir(), gobuster_validate_log_path, "subdomain_sorted_validate", True)
         validate_version_control.compare_version()
         
         return subdomain_discovery_output

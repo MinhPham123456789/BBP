@@ -7,6 +7,17 @@ import re
 The version control class using the vim -d (vim diff) capability to compare the log
 and save the version control (comparison) as a website .html to be viewed easily
 and provide more intuitive display
+
+Currently there are 2 main version control comparison categories "display" and "sorted"
+Then combined them with the purpose
+Example:
+    main_display: to have a version control displaying changes of unsorted main recon logs
+
+There are 3 places requires the categories
+get_previous_log_name()
+compare_version()
+process_log_name()
+
 """
 class VersionControl:
     def __init__(self, config_path, target_logs_dir, new_log_name, log_type="main", DEBUG=False):
@@ -26,14 +37,21 @@ class VersionControl:
 
     def get_previous_log_name(self):
         path = self.target_logs_dir
-        if self.log_type == "main" or self.log_type == "main_sorted":
+        if "display" in self.log_type:
             return self.sub_get_previous_log_name(".xml")
-        else:
-            if "validate" in self.log_type:
-                return self.sub_get_previous_log_name(".subs.brute", "gobuster_subdomain_validated")
+        else: # sorted version
+            if self.log_type == "main_sorted":
+                return self.sub_get_previous_log_name(".xml")
+            elif "subdomain" in self.log_type:
+                if "validate" in self.log_type:
+                    return self.sub_get_previous_log_name(".subs.brute", "gobuster_subdomain_validated")
+                else:
+                    return self.sub_get_previous_log_name(".subs", "gobuster_subdomain_brute")
             else:
-                return self.sub_get_previous_log_name(".subs", "gobuster_subdomain_brute")
-        print("[ERROR] Cannot get the previous log name, hihgly because of the condition in function get_previous_log_name() in recon_version_control.py")
+                print(f"[ERROR] No suitable log type found {self.log_type}")
+                return ""
+        print("[ERROR] Cannot get the previous log name, highly because of the condition in function get_previous_log_name() in recon_version_control.py")
+        return ""
 
     def sub_get_previous_log_name(self, log_extension, pattern=None):
         files = [f"{self.target_logs_dir}/{file}" for file in os.listdir(self.target_logs_dir) if (file.lower().endswith(log_extension))]
@@ -110,54 +128,95 @@ class VersionControl:
         
     def compare_version(self):
         # Get version log path with name
+        # print(f"[DEBUG] {self.previous_log_name}, {self.log_type}")
         if len(self.previous_log_name) == 0:
-            return
+            return None
         pl_name, nl_name, version_log_name = self.process_logs_name()
-        print(f"{pl_name}, {nl_name}, {version_log_name}")
-        if self.log_type == "main" or self.log_type == "main_sorted":
-            if "sorted" in self.log_type:
-                self.compare_version_sorted(pl_name, nl_name, version_log_name)
-            else:
-                self.compare_version_display(pl_name, nl_name, version_log_name)
-        else:
+        # print(f"[DEBUG] {pl_name}, {self.log_type}")
+        if pl_name == "":
+            return None
+        # print(f"{pl_name}, {nl_name}, {version_log_name}, {self.log_type}")
+        if "sorted" in self.log_type:
             self.compare_version_sorted(pl_name, nl_name, version_log_name)
-        return f"{version_log_name}"
+        else:
+            self.compare_version_display(pl_name, nl_name, version_log_name)
+        return version_log_name
 
     def process_logs_name(self):
         # print(self.new_log_name)
-        if self.log_type == "main" or self.log_type == "main_sorted":
-            if "sorted" in self.log_type:
-                pl_name = self.previous_log_name
-                pl_temp = self.previous_log_name.split("/")[-1].split(".")[0]
-                nl_name = f"{self.target_logs_dir}/{self.new_log_name}"
-                nl_temp = self.new_log_name.split(".")[0]
-                version_log_name = f"{self.version_logs_dir}/sorted_{pl_temp}_VS_{nl_temp}.html"
-            else:
+        pl_name = ""
+        nl_name = ""
+        version_log_name = ""
+        if "display" in self.log_type:
+            if self.log_type == "main_display":
                 pl_name = self.previous_log_name
                 pl_temp = self.previous_log_name.split("/")[-1].split(".")[0]
                 nl_name = f"{self.target_logs_dir}/{self.new_log_name}"
                 nl_temp = self.new_log_name.split(".")[0]
                 version_log_name = f"{self.version_logs_dir}/{pl_temp}_VS_{nl_temp}.html"
+        elif "sorted" in self.log_type:
+            if self.log_type == "main_sorted":
+                pl_name = self.previous_log_name
+                pl_temp = self.previous_log_name.split("/")[-1].split(".")[0]
+                nl_name = f"{self.target_logs_dir}/{self.new_log_name}"
+                nl_temp = self.new_log_name.split(".")[0]
+                version_log_name = f"{self.version_logs_dir}/sorted_{pl_temp}_VS_{nl_temp}.html"
+            if "subdomain" in self.log_type:
+                if "validate" in self.log_type:
+                    pl_name = self.previous_log_name
+                    pl_temp = self.previous_log_name.split("/")[-1].split(".")[0].split("gobuster_subdomain_validated_merged_")[1]
+                    nl_name = self.new_log_name
+                    nl_temp = self.new_log_name.split("/")[-1].split(".")[0].split("gobuster_subdomain_validated_merged_")[1]
+                    version_log_name = f"{self.version_logs_dir}/gobuster_subdomain_validated_merged_{pl_temp}_VS_{nl_temp}.html"
+                else: # This means "subdomain brute" scenario
+                    pl_name = self.previous_log_name
+                    pl_temp = self.previous_log_name.split("/")[-1].split(".")[0].split("gobuster_subdomain_brute_")[1]
+                    nl_name = self.new_log_name
+                    nl_temp = self.new_log_name.split("/")[-1].split(".")[0].split("gobuster_subdomain_brute_")[1]
+                    version_log_name = f"{self.version_logs_dir}/gobuster_subdomain_brute_{pl_temp}_VS_{nl_temp}.html"
         else:
-            if "validate" in self.log_type:
-                pl_name = self.previous_log_name
-                pl_temp = self.previous_log_name.split("/")[-1].split(".")[0].split("gobuster_subdomain_validated_merged_")[1]
-                nl_name = self.new_log_name
-                nl_temp = self.new_log_name.split("/")[-1].split(".")[0].split("gobuster_subdomain_validated_merged_")[1]
-                version_log_name = f"{self.version_logs_dir}/gobuster_subdomain_validated_merged_{pl_temp}_VS_{nl_temp}.html"
-            else:
-                pl_name = self.previous_log_name
-                pl_temp = self.previous_log_name.split("/")[-1].split(".")[0].split("gobuster_subdomain_brute_")[1]
-                nl_name = self.new_log_name
-                nl_temp = self.new_log_name.split("/")[-1].split(".")[0].split("gobuster_subdomain_brute_")[1]
-                version_log_name = f"{self.version_logs_dir}/gobuster_subdomain_brute_{pl_temp}_VS_{nl_temp}.html"
+            print("[ERROR] Not an available log type")
         return pl_name, nl_name, version_log_name
 
-    def send_noti(self, log):
+
+        # if self.log_type == "main" or self.log_type == "main_sorted":
+        #     if "sorted" in self.log_type:
+        #         pl_name = self.previous_log_name
+        #         pl_temp = self.previous_log_name.split("/")[-1].split(".")[0]
+        #         nl_name = f"{self.target_logs_dir}/{self.new_log_name}"
+        #         nl_temp = self.new_log_name.split(".")[0]
+        #         version_log_name = f"{self.version_logs_dir}/sorted_{pl_temp}_VS_{nl_temp}.html"
+        #     else:
+        #         pl_name = self.previous_log_name
+        #         pl_temp = self.previous_log_name.split("/")[-1].split(".")[0]
+        #         nl_name = f"{self.target_logs_dir}/{self.new_log_name}"
+        #         nl_temp = self.new_log_name.split(".")[0]
+        #         version_log_name = f"{self.version_logs_dir}/{pl_temp}_VS_{nl_temp}.html"
+        # else:
+        #     if "validate" in self.log_type:
+        #         pl_name = self.previous_log_name
+        #         pl_temp = self.previous_log_name.split("/")[-1].split(".")[0].split("gobuster_subdomain_validated_merged_")[1]
+        #         nl_name = self.new_log_name
+        #         nl_temp = self.new_log_name.split("/")[-1].split(".")[0].split("gobuster_subdomain_validated_merged_")[1]
+        #         version_log_name = f"{self.version_logs_dir}/gobuster_subdomain_validated_merged_{pl_temp}_VS_{nl_temp}.html"
+        #     else:
+        #         pl_name = self.previous_log_name
+        #         pl_temp = self.previous_log_name.split("/")[-1].split(".")[0].split("gobuster_subdomain_brute_")[1]
+        #         nl_name = self.new_log_name
+        #         nl_temp = self.new_log_name.split("/")[-1].split(".")[0].split("gobuster_subdomain_brute_")[1]
+        #         version_log_name = f"{self.version_logs_dir}/gobuster_subdomain_brute_{pl_temp}_VS_{nl_temp}.html"
+        # return pl_name, nl_name, version_log_name
+
+    def send_noti(self, version_log_path_name):
+        if version_log_path_name is None:
+            print("No new version control log to scan for changes")
+            return
         log_text = ""
-        with open(log, 'r') as l:
+        with open(version_log_path_name, 'r') as l:
             log_text = l.read()
-        scan_result_signal, scan_result_message = self.scan_for_critical_changes(log_text)
+        log_sections_list = log_text.split("<td>")
+        # print(len(log_sections_list))
+        scan_result_signal, scan_result_message = self.scan_for_critical_changes(log_sections_list[2])
         print(f"[DEBUG] Scan version control log result signal: {scan_result_signal}")
         print("[DEBUG] Scan version control log result message:")
         for message in scan_result_message:
@@ -175,9 +234,10 @@ class VersionControl:
 
         # Check for diffchange
         diff_change_list = re.findall(r'span (class\=\"DiffChange\".*?)\n', log_text)
+        diff_text_list = re.findall(r'(.*?class\=\"DiffText\".*?)\n', log_text)
+        diff_change_list = diff_change_list + diff_text_list
         if len(diff_change_list) > 0:
             return self.scan_for_critical_diff_change(diff_change_list)
-
         return False, []
 
     
@@ -190,6 +250,7 @@ class VersionControl:
             'class="DiffChange">gobuster_subdomain log name:',
             'class="DiffChange">Subdomain Discovery log:'
         ]
+        # print(f"All changes: {diff_change_list}")
         new_change_list = []
         for i in range(0, len(diff_change_list)):
             for pattern in diff_change_black_list_patterns:
@@ -199,6 +260,7 @@ class VersionControl:
                     break
             if new_signal:
                 new_change_list.append(diff_change_list[i])
+        # print(f"Real changes: {new_change_list}")
         if len(new_change_list) > 0:
             return True, new_change_list
         else:
