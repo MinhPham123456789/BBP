@@ -27,6 +27,30 @@ git clone https://github.com/gatete/DomainTrail.git
 ## Chaos ProjectDiscovery
 go install -v github.com/projectdiscovery/chaos-client/cmd/chaos@latest
 # Note: Add export CHAOS_KEY=CHAOS_API_KEY in bash profile script
+
+## gobuster
+sudo apt install gobuster
+
 ## gopsider
 sudo apt install gospider
 
+## hakrawler
+git clone https://github.com/hakluke/hakrawler.git
+cd ./hakrawler/
+go build
+cd ~/BBP_sus_tools_base
+
+## waybackurls
+git clone https://github.com/tomnomnom/waybackurls.git
+
+## gau
+git clone https://github.com/lc/gau.git
+cd ./gau/cmd/gau
+go build
+cd ~/BBP_sus_tools_base
+
+## katana
+git clone https://github.com/projectdiscovery/katana.git
+cd ./katana/cmd/katana
+go build
+cd ~/BBP_sus_tools_base
