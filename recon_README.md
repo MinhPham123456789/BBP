@@ -13,3 +13,9 @@
 
 # Add/remove new tool in subdomain recon script
 + Add or remove the process in the run_subdomain_discovery() function in subdomain_run.py
+
+# Notes
+## Watchout the EXIT CODE of the last command in the commands change in config commands
++ grep has a slightly different exit code status
+## End a command with grep (learnt through paramspider)
++ grep match exit code == 0, no match == 1, other errors >= 2

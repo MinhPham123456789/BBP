@@ -13,4 +13,4 @@ class ParserError(Exception):
         super().__init__(message)
 
 class ExecutionError(Exception):
-    """Exception raised when en error occurred during nmap call"""
+    """Exception raised when an error occurred during nmap call"""

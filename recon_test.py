@@ -25,7 +25,7 @@ import re
 
 config_path = "./recon.config"
 target = "rei.com"
-DEBUG = True
+DEBUG = not True
 master_timestamp = datetime.today().strftime('%Y_%m_%dT%H_%M_%S')
 
 def smap(f):
@@ -66,7 +66,7 @@ sample_subdomains = [
     "send.zomato.com"
 ]
 
-def params_probe_process(subdomain_log_path_name):
+def params_probe_process(subdomain_log_path_name, target, config_path, master_timestamp, debug=False):
     params_temp_path = get_env_values(config_path, "temp", "params_temp_path")
     if not os.path.exists(params_temp_path):
         os.makedirs(params_temp_path)
@@ -81,14 +81,26 @@ def params_probe_process(subdomain_log_path_name):
     # print(output)
 
     gospider_process = Gospider("www.rei.com", config_path, master_timestamp, DEBUG)
-    # output2 = gospider_process.run_probe()
-    # print(output2)
-
     paramspider_process = Paramspider("temp", config_path, master_timestamp, DEBUG)
     hakrawler_process = Hakrawler("temp", config_path, master_timestamp, DEBUG)
     waybackurls_process = Waybackurls("temp", config_path, master_timestamp, DEBUG)
-    gau_process = Gau("temp", config_path, master_timestamp, True)
-    katana_process = Katana("temp", config_path, master_timestamp, True)
+    gau_process = Gau("temp", config_path, master_timestamp, DEBUG)
+    katana_process = Katana("temp", config_path, master_timestamp, DEBUG)
+
+    ## Init Params Logging and params summary pd
+    params_logging = Logging(target, config_path, master_timestamp, "params")
+    params_logging_target_dir = params_logging.get_target_logs_dir()
+    print(params_logging_target_dir)
+    params_probe_schema = {
+        "subdomain": "object",
+        "urls": "int64",
+        "get_params": "int64",
+        "post_params": "int64",
+        "linkfinder": "int64",
+        "javascript":"int64"
+    }
+    params_probe_log_pd = pd.DataFrame(columns=params_probe_schema.keys()).astype(params_probe_schema)
+
 
     params_tool_objs = {
         "blackwidow": blackwidow_process,
@@ -104,28 +116,8 @@ def params_probe_process(subdomain_log_path_name):
     for tool_name in params_tool_objs: 
         processes.append(functools.partial(params_tool_objs[tool_name].run_probe))
 
-    params_probe_schema = {
-        "subdomain": "object",
-        "urls": "int64",
-        "get_params": "int64",
-        "post_params": "int64",
-        "linkfinder": "int64",
-        "javascript":"int64",
-        "log": "object"
-    }
-    params_probe_log_pd = pd.DataFrame(columns=params_probe_schema.keys()).astype(params_probe_schema)
 
-    for sub in subdomain_re_matches[94:97]: # REMOVE THE RANGE AFTER TESTING IN MAIN SCRIPT
-        params_temp_sum_dict = {
-            "subdomain": sub,
-            "urls": 0,
-            "get_params": 0,
-            "post_params": 0,
-            "linkfinder": 0,
-            "javascript":0,
-            "log": "log"
-        }
-        
+    for sub in subdomain_re_matches[40:43]: # REMOVE THE RANGE AFTER TESTING IN MAIN SCRIPT     
         for tool_name in params_tool_objs:
             params_tool_objs[tool_name].set_subdomain_targer(sub)
         # blackwidow_process.set_subdomain_targer(sub)
@@ -138,29 +130,42 @@ def params_probe_process(subdomain_log_path_name):
         pool.join()
         if DEBUG:
             print(res)
-        for r in res:
-            if params_temp_sum_dict["subdomain"] == r["subdomain"]:
-                params_temp_sum_dict["urls"] = params_temp_sum_dict["urls"] + r["urls"][0]
-                params_temp_sum_dict["get_params"] = params_temp_sum_dict["get_params"] + r["get_params"][0]
-                params_temp_sum_dict["post_params"] = params_temp_sum_dict["post_params"] + r["post_params"][0]
-                params_temp_sum_dict["linkfinder"] = params_temp_sum_dict["linkfinder"] + r["linkfinder"][0]
-                params_temp_sum_dict["javascript"] = params_temp_sum_dict["javascript"] + r["javascript"][0]
-                params_temp_sum_dict["log"] = f'{params_temp_sum_dict["log"]}, {str(r)}'
-                if DEBUG:
-                    print(params_temp_sum_dict)
-            else:
-                print(f"[ERROR] The subdomain name is not as expected\nExpected: {params_temp_sum_dict['subdomain']} vs Real {r['subdomain']}")
-        temp_row_pd = pd.DataFrame([params_temp_sum_dict])
+
+        params_merged_log_path_name = merge_the_params_output_logs(res, params_logging_target_dir, sub, master_timestamp, DEBUG)
+        params_sum_dict = count_web_crawling_output(params_merged_log_path_name, sub)
+        print(params_sum_dict)
+
+    #     for r in res:
+    #         if params_temp_sum_dict["subdomain"] == r["subdomain"]:
+    #             params_temp_sum_dict["urls"] = params_temp_sum_dict["urls"] + r["urls"][0]
+    #             params_temp_sum_dict["get_params"] = params_temp_sum_dict["get_params"] + r["get_params"][0]
+    #             params_temp_sum_dict["post_params"] = params_temp_sum_dict["post_params"] + r["post_params"][0]
+    #             params_temp_sum_dict["linkfinder"] = params_temp_sum_dict["linkfinder"] + r["linkfinder"][0]
+    #             params_temp_sum_dict["javascript"] = params_temp_sum_dict["javascript"] + r["javascript"][0]
+    #             params_temp_sum_dict["log"] = f'{params_temp_sum_dict["log"]}, {str(r)}'
+    #             if DEBUG:
+    #                 print(params_temp_sum_dict)
+    #         else:
+    #             print(f"[ERROR] The subdomain name is not as expected\nExpected: {params_temp_sum_dict['subdomain']} vs Real {r['subdomain']}")
+        temp_row_pd = pd.DataFrame([params_sum_dict])
         params_probe_log_pd = pd.concat([params_probe_log_pd, temp_row_pd], ignore_index=True)
         
-    params_logging = Logging(target, config_path, master_timestamp, "params")
-    params_loggin_target_dir = params_logging.get_target_logs_dir()
-    print(params_loggin_target_dir)
-    # print(params_probe_log_pd)
-    params_probe_log_pd = params_probe_log_pd.sort_values(['get_params', 'post_params', 'urls'], ascending=False)
-    params_probe_log_pd.to_csv(f"{params_loggin_target_dir}/params_probe{master_timestamp}.csv", index=False)
+    params_probe_log_pd = params_probe_log_pd.sort_values(by=['get_params', 'post_params', 'urls'], ascending=False)
+    print(params_probe_log_pd)
+    # Delete the subdomains with 0 links maybe
+    params_probe_log_pd.to_csv(f"{params_logging_target_dir}/params_probe{master_timestamp}.csv", index=False)
+    if not DEBUG:
+        params_temp_path = get_env_values(config_path, "temp", "params_temp_path")
+        rm_cmd = f"rm -rf {params_temp_path}/"
+        prep_rm_cmd = prepare_command(rm_cmd)
+        rm_sub_proc = subprocess.run(prep_rm_cmd)
+        if rm_sub_proc.returncode != 0:
+            print(f"[ERROR] Error during running this command {rm_cmd}")
+        else:
+            print(f"[PROCESS] Remove the param tools output logs after merging completed!")
 
-params_probe_process("logs/rei.com/subdomain_tools_log/gobuster_subdomain_validated_merged_2024_01_28T04_21_36.subs.brute")
+params_probe_process("logs/rei.com/subdomain_tools_log/gobuster_subdomain_validated_merged_2024_01_28T04_21_36.subs.brute", target, config_path, master_timestamp)
 
 # version_controller = VersionControl(config_path, "./logs/rei.com/subdomain_tools_log", "./logs/rei.com/subdomain_tools_log/2024_01_26T08_14_30.xml", "subdomain_validate", DEBUG)
 # version_controller.compare_version()
+

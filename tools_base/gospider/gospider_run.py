@@ -40,15 +40,10 @@ class Gospider:
             sub_proc = os.system(cmd)
             if sub_proc == 0:
                 print(f"[Process]{self.tool} completed!")
-                output_count_dict = count_web_crawling_output(temp_log_path, self.subdomain_target, self.debug)
-                output_count_dict['tool'] = self.tool
-                output_count_dict['command'] = cmd
-                if not self.debug:
-                    os.system(f"rm -rf {temp_log_path}")
-                return output_count_dict
+                return temp_log_path
 
             else:
-                raise ExecutionError(f"Something went wrong with this {self.tool} tool")
+                print(f"Something went wrong with this {self.tool} tool")
                 return f"Error during execution\n{self.tool_log_path} may not exist or empty"
         else:
             raise NotInstalledError()
