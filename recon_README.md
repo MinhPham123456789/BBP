@@ -1,3 +1,7 @@
+# Should plan to work on
++ Should turn the tag labelling shell script into a config var
++ rather than retype the script's path
+
 # Manual check
 + Reverse WHOIS: using the WHOIS result
 + Write and run a script to get all the ip addresses of a domain: using the NSLOOKUP result (CIDR, Organization)

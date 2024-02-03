@@ -4,13 +4,13 @@ from tools_base.subdomain.chaos_run import Chaos
 from tools_base.subdomain.domaintrail_run import Domaintrail
 from tools_base.subdomain.gobuster_subdomain_run import GobusterSubdomain
 
-from tools_base.blackwidow.blackwidow_run import Blackwidow
-from tools_base.gospider.gospider_run import Gospider
-from tools_base.paramspider.paramspider_run import Paramspider
-from tools_base.hakrawler.hakrawler_run import Hakrawler
-from tools_base.waybackurls.waybackurls_run import Waybackurls
-from tools_base.gau.gau_run import Gau
-from tools_base.katana.katana_run import Katana
+from tools_base.urls_and_parameters.blackwidow.blackwidow_run import Blackwidow
+from tools_base.urls_and_parameters.gospider.gospider_run import Gospider
+from tools_base.urls_and_parameters.paramspider.paramspider_run import Paramspider
+from tools_base.urls_and_parameters.hakrawler.hakrawler_run import Hakrawler
+from tools_base.urls_and_parameters.waybackurls.waybackurls_run import Waybackurls
+from tools_base.urls_and_parameters.gau.gau_run import Gau
+from tools_base.urls_and_parameters.katana.katana_run import Katana
 
 from recon_utils import *
 from recon_logging import *

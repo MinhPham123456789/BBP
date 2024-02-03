@@ -12,11 +12,11 @@ from recon_exceptions import *
 from recon_utils import *
 from recon_logging import Logging
 from recon_version_control import VersionControl
-from .snrublist3r_run import Snrublist3er
-from .chaos_run import Chaos
-from .httpx_run import Httpx
-from .gobuster_subdomain_run import GobusterSubdomain
-from .domaintrail_run import Domaintrail
+from tools_base.subdomain.snrublist3r_run import Snrublist3er
+from tools_base.subdomain.chaos_run import Chaos
+from tools_base.subdomain.httpx_run import Httpx
+from tools_base.subdomain.gobuster_subdomain_run import GobusterSubdomain
+from tools_base.subdomain.domaintrail_run import Domaintrail
 
 ordered_subdomain_wordlists = [
     "deepmagic.com-prefixes-top500.txt",
