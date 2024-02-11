@@ -182,10 +182,10 @@ class SubdomainScanner:
         # Initiating subdomain logging directory
         self.subdomain_logging = Logging(self.target, self.command_config_path, self.timestamp, "subdomain")
 
-        # Snrublist3r
-        snrublist3r_process = Snrublist3er(self.target, self.command_config_path, self.timestamp, self.debug)
-        tools_object_dictionary['snrublist3r'] = snrublist3r_process
-        commands_dictionary['snrublist3r'] = snrublist3r_process.command
+        # # Snrublist3r
+        # snrublist3r_process = Snrublist3er(self.target, self.command_config_path, self.timestamp, self.debug)
+        # tools_object_dictionary['snrublist3r'] = snrublist3r_process
+        # commands_dictionary['snrublist3r'] = snrublist3r_process.command
 
         # Chaos
         chaos_process = Chaos(self.target, self.command_config_path, self.timestamp, self.debug)
@@ -298,9 +298,3 @@ class SubdomainScanner:
         # httpx_log_output = httpx_process.run_command(tools_log_name)
         return f"{tools_log_name}.brute"
         
-
-def smap(f):
-    """
-    This method is utilised by multiprocess pool
-    """
-    return f()

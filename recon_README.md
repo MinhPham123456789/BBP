@@ -18,6 +18,9 @@
 # Add/remove new tool in subdomain recon script
 + Add or remove the process in the run_subdomain_discovery() function in subdomain_run.py
 
+# Remove the range when not running in DEBUG mode
++ The range in the subdomain loop in the urls_and_params_run.py script, the function run_urls_and_params_discovery()
+
 # Notes
 ## Watchout the EXIT CODE of the last command in the commands change in config commands
 + grep has a slightly different exit code status

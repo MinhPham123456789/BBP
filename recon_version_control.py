@@ -248,7 +248,9 @@ class VersionControl:
             'class="DiffChange">Command: gobuster',
             'class="DiffChange">gobuster_subdomain log path:',
             'class="DiffChange">gobuster_subdomain log name:',
-            'class="DiffChange">Subdomain Discovery log:'
+            'class="DiffChange">Subdomain Discovery log:',
+            'class="DiffChange">URLs and parameters summary record:',
+            'class="DiffChange">URLs and parameters log path:'
         ]
         # print(f"All changes: {diff_change_list}")
         new_change_list = []

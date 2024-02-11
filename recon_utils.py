@@ -148,3 +148,8 @@ def count_web_crawling_output(output_log_path, subdomain):
 
     return output_count_dict
 
+def smap(f):
+    """
+    This method is utilised by multiprocess pool
+    """
+    return f()

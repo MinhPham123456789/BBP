@@ -2,10 +2,12 @@ from tools_base.whois.whois_run import Whois
 from tools_base.nslookup.nslookup_run import Nslookup
 from tools_base.nmap.nmap_run import Nmap
 from recon_phase_scripts.subdomain_run import SubdomainScanner
+from recon_phase_scripts.urls_and_params_run import URLsAndParamsScanner
 from recon_logging import Logging
 from recon_version_control import VersionControl
 
 import functools
+import re
 from multiprocessing import Pool
 from datetime import datetime
 
@@ -62,7 +64,6 @@ if len(outputs_dictionary) != len(res):
     print("[ALERT] THE EXPECTED OUTPUT AND THE PROCESS POOL'S OUTPUT LIST DO NOT HAVE THE SAME LENGTH!!!")
 
 ### Subdomain section
-
 # Note: Rebuild the subdomain wordlists is in recon_test
 subdomain_process = SubdomainScanner(target, config_path, master_timestamp, 2, DEBUG)
 
@@ -72,6 +73,14 @@ subdomain_process = SubdomainScanner(target, config_path, master_timestamp, 2, D
 tools_object_dictionary['subdomain'] = subdomain_process
 outputs_dictionary['subdomain'] = subdomain_process.run_subdomain_discovery()
 commands_dictionary['subdomain'] = subdomain_process.command
+
+### URLs and parameters section
+discovered_subdomain_logs_list = re.findall(r'gobuster_subdomain log path: (.*\.subs\.?.*)\n', outputs_dictionary['subdomain'])
+# print(discovered_subdomain_logs_list)
+urls_and_params_process = URLsAndParamsScanner(target, config_path, master_timestamp, discovered_subdomain_logs_list)
+tools_object_dictionary['urls_and_params'] = urls_and_params_process
+outputs_dictionary['urls_and_params'] = urls_and_params_process.run_URLs_and_params_discovery()
+commands_dictionary['urls_and_params'] = urls_and_params_process.command
 
 ### Logging section
 xml_output_order = xml_logger.get_output_order()

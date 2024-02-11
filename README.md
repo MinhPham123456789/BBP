@@ -24,7 +24,10 @@ This project aims to integrate external pentesting tools into a reconnaissance s
 + Use `blackwidow` to crawl the domains/subdomains of the target to extract the URL links, parameters, and javascript (https://github.com/1N3/BlackWidow) (note: this repo has a customised blackwidow` script)
 + Use `gospider` to crawl the domains/subdomains of the target to extract the URL links, parameters, and javascript (https://github.com/jaeles-project/gospider)
 + Use `paramspider` to get records of URL links, parameters, javascripts of the target from Wayback archives database (https://github.com/devanshbatham/ParamSpider)
-
++ Use `hakrawler` to crawl the domains/subdomains of the target to extract the URL links, parameters, and javascript (https://github.com/hakluke/hakrawler)
++ Use `waybackurls` to get records of URL links, parameters, javascripts of the target from WayBack, CommonCrawl, VirusTotal (https://github.com/tomnomnom/waybackurls)
++ Use `gau` to get records of URL links, parameters, javascripts of the target from AlienVault, WayBack, URLScan, CommonCrawl (https://github.com/lc/gau)
++ Use `katana` to crawl the domains/subdomains of the target to extract the URL links, parameters, and javascript (https://github.com/projectdiscovery/katana)
 ### Active Scan
 + Use `nmap` to get an overview of the open services and ports of the target along with potential vulnerabilities.
 

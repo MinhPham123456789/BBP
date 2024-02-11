@@ -1,4 +1,6 @@
-from tools_base.subdomain.subdomain_run import SubdomainScanner
+from recon_phase_scripts.subdomain_run import SubdomainScanner
+from recon_phase_scripts.urls_and_params_run import URLsAndParamsScanner
+
 from tools_base.subdomain.snrublist3r_run import Snrublist3er
 from tools_base.subdomain.chaos_run import Chaos
 from tools_base.subdomain.domaintrail_run import Domaintrail
@@ -164,8 +166,12 @@ def params_probe_process(subdomain_log_path_name, target, config_path, master_ti
         else:
             print(f"[PROCESS] Remove the param tools output logs after merging completed!")
 
-params_probe_process("logs/rei.com/subdomain_tools_log/gobuster_subdomain_validated_merged_2024_01_28T04_21_36.subs.brute", target, config_path, master_timestamp)
+# params_probe_process("logs/rei.com/subdomain_tools_log/gobuster_subdomain_validated_merged_2024_01_28T04_21_36.subs.brute", target, config_path, master_timestamp)
 
 # version_controller = VersionControl(config_path, "./logs/rei.com/subdomain_tools_log", "./logs/rei.com/subdomain_tools_log/2024_01_26T08_14_30.xml", "subdomain_validate", DEBUG)
 # version_controller.compare_version()
 
+urls_and_params_phase = URLsAndParamsScanner(target, config_path, master_timestamp, "logs/rei.com/subdomain_tools_log/gobuster_subdomain_validated_merged_2024_01_28T04_21_36.subs.brute")
+urls_and_params_phase.run_URLs_and_params_discovery()
+print(urls_and_params_phase.get_params_merged_log_path())
+print(urls_and_params_phase.get_params_probe_pd_log_path_name())
