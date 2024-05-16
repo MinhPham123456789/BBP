@@ -12,7 +12,7 @@ from multiprocessing import Pool
 from datetime import datetime
 
 config_path = "./recon.config"
-target = "rei.com"
+target = "rei.com" # Just the first 2 domain levels
 DEBUG = not True
 master_timestamp = datetime.today().strftime('%Y_%m_%dT%H_%M_%S')
 

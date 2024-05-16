@@ -32,7 +32,7 @@ def prepare_command(command):
 
 command_whitelist = ["subdomains_merge"]
 external_tools = ["snrublist3r", "chaos", "httpx", "blackwidow", "paramspider", "domaintrail",
-                  "hakrawler", "waybackurls", "gau", "katana"
+                  "hakrawler", "waybackurls", "gau", "katana", "nuclei_tech_analysis"
                  ]
 
 def check_command_existence(tool):
