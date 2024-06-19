@@ -27,6 +27,7 @@ class NucleiTechAnalysis:
     def run_command(self):
         if check_command_existence(self.tool):
             cmd = prepare_command(self.command)
+            # print(cmd)
             sub_proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             try:
                 output, errs = sub_proc.communicate()

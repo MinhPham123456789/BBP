@@ -181,10 +181,10 @@ sample_subdomains = [
 # print(urls_and_params_phase.get_params_merged_log_path())
 # print(urls_and_params_phase.get_params_probe_pd_log_path_name())
 
-# nuclei_tech_analysis_process = NucleiTechAnalysis(sample_subdomains[1], config_path, master_timestamp, DEBUG)
-# test = nuclei_tech_analysis_process.run_command()
-# print(test)
+nuclei_tech_analysis_process = NucleiTechAnalysis(sample_subdomains[1], config_path, master_timestamp, DEBUG)
+test = nuclei_tech_analysis_process.run_command()
+print(test)
 
-built_with_process = BuiltWithAnalysis(sample_subdomains[0], config_path, master_timestamp, DEBUG)
-test2 = built_with_process.run_command()
-print(test2)
+# built_with_process = BuiltWithAnalysis(sample_subdomains[0], config_path, master_timestamp, DEBUG)
+# test2 = built_with_process.run_command()
+# print(test2)
